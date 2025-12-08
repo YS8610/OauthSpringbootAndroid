@@ -1,7 +1,6 @@
 package com.yoong.swifty_companion.service;
 
 import java.net.URI;
-import java.util.Map;
 
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -19,18 +18,15 @@ import com.yoong.swifty_companion.exception.ApiReqException;
 import com.yoong.swifty_companion.model.OauthToken;
 import com.yoong.swifty_companion.model.OauthTokenInfo;
 
-import jakarta.servlet.http.HttpSession;
 
 @Service
 public class TokenSvc {
   private final ConfigProperties configProperties;
   private final RestTemplate restTemplate;
-  private final Map<String, OauthTokenInfo> userStore;
 
-  public TokenSvc(ConfigProperties configProperties, RestTemplate restTemplate, Map<String, OauthTokenInfo> userStore) {
+  public TokenSvc(ConfigProperties configProperties, RestTemplate restTemplate) {
     this.configProperties = configProperties;
     this.restTemplate = restTemplate;
-    this.userStore = userStore;
   }
 
   public OauthToken getAccessToken(String code) {
@@ -52,34 +48,23 @@ public class TokenSvc {
     return tokenResponse.getBody();
   }
 
-  public String refreshToken(String accessToken, HttpSession session) {
-    if (!userStore.containsKey(accessToken)){
-      session.removeAttribute(accessToken);
-      throw new ApiReqException("No refresh token found for the given access token", HttpStatus.BAD_REQUEST.value());
-    }
+  public OauthToken refreshToken(String refreshToken) {
     URI tokenUri = URI.create(SwiftyConstants.API_42_TOKEN_URL);
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     headers.set("Accept", "application/json");
-    // send client credentials via HTTP Basic auth (required by many OAuth token
-    // endpoints)
     LinkedMultiValueMap<String, String> form = new LinkedMultiValueMap<>();
     form.add("grant_type", "refresh_token");
     form.add("client_id", configProperties.clientId());
     form.add("client_secret", configProperties.clientSecret());
-    form.add("refresh_token", userStore.get(accessToken).rfToken());
+    form.add("refresh_token", refreshToken);
     HttpEntity<MultiValueMap<String, String>> httpEntity = new HttpEntity<>(form, headers);
     // execute request
     ResponseEntity<OauthToken> tokenResponse = restTemplate.postForEntity(tokenUri, httpEntity, OauthToken.class);
     if (!tokenResponse.getStatusCode().is2xxSuccessful() || tokenResponse.getBody() == null)
       throw new ApiReqException("Error refreshing token", HttpStatus.BAD_GATEWAY.value());
     System.out.println("Token response body: " + tokenResponse.getBody());
-    // parse JSON response and return new access_token
-    OauthToken oauthToken = tokenResponse.getBody();
-    userStore.remove(accessToken);
-    userStore.put(oauthToken.access_token(),
-        new OauthTokenInfo(oauthToken.expires_in() + oauthToken.created_at(), oauthToken.refresh_token()));
-    return oauthToken.access_token();
+    return tokenResponse.getBody();
   }
 
   public boolean isTokenExpired(OauthTokenInfo tokenInfo) {

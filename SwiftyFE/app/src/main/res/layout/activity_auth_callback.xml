@@ -48,4 +48,18 @@
                     app:layout_constraintVertical_bias="0.5"/>
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
+    <Button
+            android:text="Logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/logout"
+            android:layout_marginEnd="8dp" app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" android:layout_marginTop="8dp"
+            android:onClick="LogoutButtonHandler"/>
+    <Button
+            android:text="RefreshTkn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" android:id="@+id/refresher"
+            app:layout_constraintStart_toEndOf="@+id/button" app:layout_constraintHorizontal_bias="0.521"
+            app:layout_constraintEnd_toStartOf="@+id/logout" app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="8dp"/>
 </androidx.constraintlayout.widget.ConstraintLayout>
