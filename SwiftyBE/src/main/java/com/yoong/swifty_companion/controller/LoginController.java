@@ -69,8 +69,9 @@ public class LoginController {
     // session.setAttribute("refresh_token", oauthToken.refresh_token());
     System.out.println("access_token in session " + accessToken);
     System.out.println("refresh_token in session " + oauthToken.refresh_token());
+    int expiryTime = oauthToken.expires_in()+ oauthToken.created_at();
     URI uri = URI.create(
-        SwiftyConstants.DEEP_LINK_CALLBACK + "?token=" + accessToken + "&refresh_token=" + oauthToken.refresh_token());
+        SwiftyConstants.DEEP_LINK_CALLBACK + "?token=" + accessToken + "&refresh_token=" + oauthToken.refresh_token()+ "&expires_in=" + expiryTime );
     return ResponseEntity.status(HttpStatus.FOUND).location(uri).build();
   }
 

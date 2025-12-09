@@ -33,6 +33,13 @@ public class MainActivity extends AppCompatActivity {
         authButton = findViewById(R.id.auth_button);
         searchButton = findViewById(R.id.searchButton);
         View searchView = findViewById(R.id.searchText);
+        View tokenView = findViewById(R.id.tokenView);
+        if (ConstantSwifty.MAP.isEmpty())
+            tokenView.setVisibility(View.INVISIBLE);
+        else {
+            tokenView.setVisibility(View.VISIBLE);
+            ((TextView) tokenView).setText(ConstantSwifty.MAP.toString());
+        }
         if (authButton == null)
             Log.w("MainActivity", "auth_button not found in layout");
         else{
